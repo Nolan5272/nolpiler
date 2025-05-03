@@ -16,6 +16,14 @@ typedef struct {
 	char text[64];
 } NolanToken;
 
+typedef struct {
+	NolanToken *ntokens;
+	int pos;
+	int count;
+}Parser;
+
+
+
 
 void print_token(NolanToken nToken){
 
@@ -32,7 +40,7 @@ void print_token(NolanToken nToken){
 	
 	FILE *output_file = fopen("output.txt", "a");
     if (!output_file) {
-        fprintf(stderr, "Error: Could not open output file.\n");
+        fprintf(stderr, "Error w/file.\n");
         exit(1);
     }
 
@@ -62,6 +70,11 @@ int main(){
 	NolanToken nToken;
 	char rChar;
 
+	const int MAX_TOKENS = 1024;
+	NolanToken n_tokens[MAX_TOKENS];
+	int tokenCount = 0;
+
+
 	while ((rChar = fgetc(file)) != EOF){
 		if (isspace(rChar)) continue;
 
@@ -86,6 +99,14 @@ int main(){
 			}
 			
 			print_token(nToken);
+
+			if (tokenCount < MAX_TOKENS){
+				n_tokens[tokenCount] = nToken;
+				tokenCount++;
+			}
+			else{
+				printf("exceeds token count");
+			}
 		}
 
 		else if(isdigit(rChar)){
@@ -102,13 +123,44 @@ int main(){
 			nToken.type = TOKEN_NUM;
 			print_token(nToken);
 
+			if (tokenCount < MAX_TOKENS){
+				n_tokens[tokenCount] = nToken;
+				tokenCount++;
+			}
+			else{
+				printf("exceeds token count");
+			}
+
 		}
 
 		else if(ispunct(rChar)){
+			if (rChar == '#'){
+				int i = 0;
+				nToken.text[i] = rChar;
+				i++;
+				while(isalnum(rChar = fgetc(file)) | rChar == '_'){
+					//int i = 0;
+					nToken.text[i] = rChar;
+					i++;
+				}
+				nToken.text[i] = '\0';
+				ungetc(rChar, file);
+				nToken.type = TOKEN_CWORD;
+			}else {
 			nToken.text[0] = rChar;
 			nToken.text[1] = '\0';
 			nToken.type = TOKEN_SYMBOL;
+			}
+
 			print_token(nToken);
+
+			if (tokenCount < MAX_TOKENS){
+				n_tokens[tokenCount] = nToken;
+				tokenCount++;
+			}
+			else{
+				printf("exceeds token count");
+			}
 		}
 
 	}
