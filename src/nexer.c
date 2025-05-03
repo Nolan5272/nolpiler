@@ -23,8 +23,6 @@ typedef struct {
 }Parser;
 
 
-
-
 void print_token(NolanToken nToken){
 
 	const char *type_str;
@@ -59,6 +57,34 @@ int is_cword(const char *str){
 
 }
 
+#define MAX_TOKENS 1024
+NolanToken n_tokens[MAX_TOKENS];
+int tokenCount = 0;
+int currentToken = 0;
+
+NolanToken peek(){
+	return n_tokens[currentToken];
+}
+
+NolanToken advance(){
+	return n_tokens[currentToken++];
+	//currentToken++;
+}
+
+int match(const char *text){
+	if(strcmp(peek().text, text) ==0) {
+		advance();
+		return 1;
+	}
+	return 0;
+}
+
+void parse(){
+	if(match("int") && match("main")){
+		printf("Parsed Successfully: int main() { return 0 }");
+	}
+}
+
 int main(){
 
 	FILE *file = fopen("test.c", "r");
@@ -69,11 +95,6 @@ int main(){
 
 	NolanToken nToken;
 	char rChar;
-
-	const int MAX_TOKENS = 1024;
-	NolanToken n_tokens[MAX_TOKENS];
-	int tokenCount = 0;
-
 
 	while ((rChar = fgetc(file)) != EOF){
 		if (isspace(rChar)) continue;
